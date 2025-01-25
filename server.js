@@ -39,6 +39,12 @@ app.post('/insertData', async (req, res) => {
     })
 });
 
+app.get('/deleteAll', async (req, res) => {
+    // const data = req.body;
+    await client.db('IOT').collection("sensors").deleteMany({}).then(result =>{
+        res.status(200).json({server: result.deletedCount});
+    })
+});
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
