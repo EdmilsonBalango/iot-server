@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const { default: db, client } = require('./DBconnection');
 
-const hostname = process.env.HOSTNAME || '127.0.0.1'
+const hostname = process.env.HOSTNAME || '0.0.0.0'
 const port = process.env.PORT || 3001
 const app = express();
 
@@ -16,8 +16,8 @@ app.use(bodyparser.urlencoded({ extended: false }));
 app.use(morgan('combined'));
 
 
-async function getData(table) {
-    const devices = client.db('IOT').collection(table).find().toArray((err, result) => {
+async function getData() {
+    const devices = client.db('IOT').collection("Devices").find().toArray((err, result) => {
         if (err) throw err;
         return result;
     });
@@ -26,25 +26,31 @@ async function getData(table) {
 
 //route to get all data from a devices from the table
 app.get('/', async (req, res) => {
-    const received = req.body.table;
-    const data = await getData(received);
-    res.status(200).json({server: 'Ok', data});
+    const data = await getData();
+    res.status(200).json(data);
 });
 
 //route to insert data into the table
 app.post('/insertData', async (req, res) => {
     const data = req.body;
-    await client.db('IOT').collection("sensors").insertOne(data).then(result =>{
+    await client.db('IOT').collection("Devices").insertOne(data).then(result =>{
         res.status(200).json({server: result.insertedId});
+        console.log("Device sent something", result.insertedId);
     })
 });
 
-app.get('/deleteAll', async (req, res) => {
-    // const data = req.body;
-    await client.db('IOT').collection("sensors").deleteMany({}).then(result =>{
-        res.status(200).json({server: result.deletedCount});
-    })
+app.get('/getBasic', async (req, res) => {
+    await client.db('IOT').collection("Devices").find({ fPort: 100 }).project({ devEUI: 1, deviceName: 1, objectJSON: 1, publishedAT: 1 }).toArray().then(result =>{
+        res.status(200).json(result);
+    });
+    
 });
+
+// app.get('/deleteAll', async (req, res) => {
+//     await client.db('IOT').collection("Devices").deleteMany({}).then(result =>{
+//         res.status(200).json({server: result.deletedCount});
+//     })
+// });
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
