@@ -41,21 +41,21 @@ app.post('/insertData', async (req, res) => {
 
 app.get('/getBasic', async (req, res) => {
     const response = await client.db('IOT').collection("Devices").find({ fPort: 100 }).project({ devEUI: 1, deviceName: 1, objectJSON: 1, publishedAt: 1 }).toArray().then(result =>{
-        const processedData =[]
-        res.status(200).json(result);
-        result.forEach(log => {
-            processedData.push({
-                _id: log._id,
-                deviceName: log.deviceName,
-                devEUI: log.devEUI,
-                objectJSON: JSON.parse(log.objectJSON),
-                publishedAt: log.publishedAt
-            });
-        });
-        return processedData;
+        return result;
+    }).catch(err => {
+        console.error('Failed to get data', err);
     });
-    res.status(200).json(response);
-    
+    const modif = []
+    await response.forEach(element => {
+        var data = {
+            devEUI: element.devEUI,
+            deviceName: element.deviceName,
+            objectJSON: JSON.parse(element.objectJSON),
+            publishedAt: element.publishedAt
+        };
+        modif.push(data);
+    });
+    res.status(200).json(modif);
 });
 
 // app.get('/deleteAll', async (req, res) => {
