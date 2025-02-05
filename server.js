@@ -40,8 +40,8 @@ app.post('/insertData', async (req, res) => {
 });
 
 app.get('/getBasic', async (req, res) => {
-    const processedData =[]
-    await client.db('IOT').collection("Devices").find({ fPort: 100 }).project({ devEUI: 1, deviceName: 1, objectJSON: 1, publishedAt: 1 }).toArray().then(result =>{
+    const response = await client.db('IOT').collection("Devices").find({ fPort: 100 }).project({ devEUI: 1, deviceName: 1, objectJSON: 1, publishedAt: 1 }).toArray().then(result =>{
+        const processedData =[]
         res.status(200).json(result);
         result.forEach(log => {
             processedData.push({
@@ -52,9 +52,9 @@ app.get('/getBasic', async (req, res) => {
                 publishedAt: log.publishedAt
             });
         });
-        res.status(200).json(processedData);
-
+        return processedData;
     });
+    res.status(200).json(response);
     
 });
 
