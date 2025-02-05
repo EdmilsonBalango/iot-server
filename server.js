@@ -44,15 +44,15 @@ app.get('/getBasic', async (req, res) => {
     await client.db('IOT').collection("Devices").find({ fPort: 100 }).project({ devEUI: 1, deviceName: 1, objectJSON: 1, publishedAt: 1 }).toArray().then(result =>{
         res.status(200).json(result);
         result.forEach(log => {
-            {
-                log._id,
-                log.deviceName,
-                log.devEUI,
-                JSON.parse(log.objectJSON),
-                log.publishedAt
-                
-            }
-        })
+            processedData.push({
+                _id: log._id,
+                deviceName: log.deviceName,
+                devEUI: log.devEUI,
+                objectJSON: JSON.parse(log.objectJSON),
+                publishedAt: log.publishedAt
+            });
+        });
+        res.status(200).json(processedData);
 
     });
     
